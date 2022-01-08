@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChoosePerson</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        *{
+            transition: all 0.3s linear;
+        }
+        table{
+            width: 250px;
+        }
+        table tbody td:last-child{
+            text-align: center;
+        }
+        .add-person{
+            display: flex;
+            align-items: center;
+        }
+        .add-person h3{
+            margin-right: 10px;
+        }
+        .add-person i{
+            font-size: 30px;
+        }
+        h1{
+            color: red;
+            background-color: #ccc;
+            border-radius: 5px;
+            font-size: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        table{
+            font-size: 20px;
+            width: 100%;
+        }
+
+        .container{
+            padding: 10px;
+        }
+
+        .add-person{
+            background-color: yellow;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 10px;
+            margin-bottom: 10px;
+        }
+        .add-person i:active{
+            opacity: 0.6;
+        }
+        /*modal*/
+        .overlay{
+            background-color: rgba(0,0,0,.7);
+            position: fixed;
+            top:0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            align-items: center;
+            justify-content: center;
+            display: none;
+        }
+
+        .box{
+            background-color: #fff;
+            width: 200px;
+            border-radius: 15px;
+            font-size: 10px;
+            padding: 20px;
+        }
+        .box button{
+            margin-top: 10px;
+        }
+        .show{
+            display: flex;
+        }
+
+        .finish{
+            margin-top: 20px;
+            border: 1px solid green;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: green;
+        }
+        .finish:active{
+            opacity: 0.6;
+        }
+        tfoot td{
+            display: flex;
+            justify-content: space-between;
+        }
+        body{
+            max-width: 350px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lựa chọn người nhận tiền</h1>
+    <div class="container">
+        <table border="1">
+            <thead>
+                <th>Player</th>
+                <th>Chọn</th>
+            </thead>
+            <tbody id="data">
+                
+            </tbody>
+            <tfoot>
+               <td colspan="2">Chọn tất cả
+                <input type="checkbox" id="fullfill">
+               </td>
+            </tfoot>
+        </table>
+    </div>
+    
+    <div class="add-person">
+        <h3>Thêm người chơi ?</h3>
+        <i class="fas fa-plus-circle" style="color:red;"></i>
+    </div>
+    <span><em>Vui lòng không load lại trang khi nhập tên người chơi mới !</em></span>
+
+    <div class="modal_add-person">
+        <div class="overlay">
+            <div class="box">
+                <h2>Nhập tên người chơi</h2>
+                <input type="text">
+                <button id="btn-add">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="finish">
+        <h2>Đã chọn xong 
+            <i class="fas fa-check"></i>
+        </h2>
+    </div>
+
+    <script>
+        var person = [
+            'Phan Quí', 'Kim Ngân', 'Hữu Tình','Anh Bằng', 'Gia Bảo', 'Gia Khôi', 'Ngọc Trâm'
+        ]
+
+        function arrayShow(){
+            let count=0;
+            const htmls = person.map((item,index) => {
+            return `
+            <tr>
+                    <td>${++count}. ${item}</td>
+                    <td>
+                        <input type="checkbox" data-name="${person[index]}">
+                    </td>
+            </tr>
+            `
+        })
+            const showPerson = document.querySelector('#data');
+            showPerson.innerHTML = htmls.join('');
+        }
+        
+        arrayShow();
+
+        //Xử lí khi nhấn vào add person
+        const clickAddPerson = document.querySelector('.add-person i');
+        const getOverlay = document.querySelector('.overlay')
+        clickAddPerson.onclick = ()=>{
+            getOverlay.style.display='flex'
+        }
+
+        //Xử lí khi nhấn xác nhận thêm người mới
+        const btnSubmitNewPerson = document.querySelector('#btn-add');
+        btnSubmitNewPerson.onclick =()=>{
+            const dataNewPerson = document.querySelector('.box input').value;
+            if(dataNewPerson !== ''){
+                person.push(dataNewPerson);
+            }
+            document.querySelector('.box input').value='';
+            getOverlay.style.display='none';
+            arrayShow();
+        }
+
+        //Kiểm tra sự chọn lựa người chơi
+        const btnFinish = document.querySelector('.finish')
+        btnFinish.onclick= ()=>{
+            const arrayNewName=[]
+            let countCheck=0;
+            const ArrayCheck = document.querySelectorAll('tbody#data td input')
+             ArrayCheck.forEach((item)=>{
+                 if(item.checked === true)
+                {
+                    ++countCheck;
+                    arrayNewName.push(item.dataset.name);
+                }
+            })
+
+            localStorage.setItem('personJoin',JSON.stringify(arrayNewName))
+            
+            if(countCheck===0){
+                alert('Vui lòng chọn người chơi !');
+            }
+            else {
+                window.location.assign("playgame.html")
+            }
+        }
+
+        //Xử lí chọn tất cả
+        const fillall = document.querySelector('#fullfill')
+        fillall.onclick = ()=>{
+            if(fillall.checked===true){
+                const ArrayCheck = document.querySelectorAll('tbody#data td input')
+                ArrayCheck.forEach((item)=>{
+                item.checked = true;
+                })
+            }
+            else if(fillall.checked==false){
+                const ArrayCheck = document.querySelectorAll('tbody#data td input')
+                ArrayCheck.forEach((item)=>{
+                    item.checked = false;
+                })
+            }
+        }
+
+       
+
+    </script>
+</body>
+</html>

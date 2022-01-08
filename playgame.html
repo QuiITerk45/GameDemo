@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>PlayGame</title>
+    
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        body{
+            padding: 5px;
+            max-width: 350px;
+        }
+       
+        .cart{
+            display: grid;
+            grid-gap:5px;
+            grid-template-columns: repeat(3,1fr);
+        }
+        .cart .img-cart{
+            width:90px;
+        }
+
+        .cart img{
+            object-fit: contain;
+            object-position: center;
+            width: 100%;
+            height: 100%;
+        }
+        .active-animation{
+            border:2px solid red;
+        }
+
+        /*Css cho thẻ ngẫu nhiên*/
+        .cart-number{
+            display: flex;
+            justify-content: space-around;
+            display: none;
+        }
+        .cart-number div{
+            border: 2px solid #f9ca24;
+            border-radius: 20px;
+            width: 90px;
+        }
+
+        .animation {
+            animation:baolixi 0.5s infinite alternate linear;
+        }
+
+        .cart-number img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        @keyframes baolixi{
+            from{
+                transform:rotate(27deg);
+                background-color:red;
+            }
+            to{
+                transform: rotate(-27deg);
+            }
+        }
+
+
+        .body-game{
+            position: relative;
+            width: 300px;
+        }
+        .overlay{
+            position:absolute;
+            background-color:rgba(0,0,0,.6);
+            top: 10px;
+            left: 0;
+            right: 0;
+            width: 500px;
+            height: 170px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .result-kq{
+            font-size: 40px;
+            color: red;
+            font-weight: bold;
+        }
+
+        .borderColor{
+            animation: chopchop 0.2s infinite linear;
+        }
+
+        @keyframes chopchop{
+            from{
+                outline: 3px solid red;
+            }
+            to{
+                outline: 5px solid blue;
+            }
+        }
+
+
+        .container-lucky{
+            max-width: 350px;
+        }
+
+    
+        .kichhoatchon{
+            animation: lixiChoose 0.5s infinite linear;
+        }
+
+        @keyframes lixiChoose {
+            from{
+                background-color: red;
+            }
+            to{
+                background-color: yellow;
+            }
+        }
+
+        .board-card{
+            width: 150px;
+        }
+        .img-lucky{
+            width: 350px;
+            height: 150px;
+        }
+        #imglucky{
+            display: none;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+        }
+
+        #playerName{
+            animation: color 1s infinite ease;
+            font-size: 50px;
+        }
+        @keyframes color{
+            from{
+                color: red;
+            }
+            to{
+                color: green;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Cung chúc tân xuân</h2>
+        <h1>Lượt chơi</h1>
+        <span>
+            <i class="fas fa-long-arrow-alt-right"></i>
+            <span id="playerName"></span>
+        </span>
+        <div class="container-lucky">
+            <div class="board-card">
+                <div class="cart">
+                  
+                </div>
+            </div>
+        </div>
+        <div class="container-player">
+        </div>
+    </div>
+    <div class="body-game">
+        <button id="btn-play">Bắt đầu</button>
+        <div class="cart-number">
+            <div class="item-number" data-index="">
+                <img src="./assets/img/baolixi.png" alt="">
+            </div>
+            <div class="item-number" data-index="">
+                <img src="./assets/img/baolixi.png" alt="">
+            </div>
+            <div class="item-number" data-index="">
+                <img src="./assets/img/baolixi.png" alt="">
+            </div>
+        </div>
+        <div class="overlay">
+
+        </div>
+    </div>
+    <div class="result">
+        <h2>Số may mắn :
+            <span class="result-kq">?</span>
+        </h2>
+        <button id="nhantien" class="NhanMoney" disabled>  
+            Nhận tiền <i class="fas fa-hand-holding-usd"></i>
+        </button>
+    </div>
+
+    <!-- <div class="rank-table">
+        <table border="1">
+            <thead>
+                <th>Tên người chơi</th>
+                <th>Số tiền</th>
+            </thead>
+            <tbody class="data-rank">
+                
+            </tbody>
+        </table>
+    </div> -->
+    <div class="img-lucky">
+        <img src="" alt="" id="imglucky" >
+    </div>
+    <script>
+        const $=document.querySelector.bind(document);
+        const $$=document.querySelectorAll.bind(document);
+
+        const cart=$('.cart');
+        const btnPlay = $('#btn-play');
+        const divAnimation = $$('.item-number')
+        const showNumberLucky  = $('.result-kq')
+        const overlay=$('.overlay')
+        const imgCart=$$('.img-cart');
+        const anKq = $('.cart-number')
+        const playerName = $('#playerName');
+        const getMoney = $('#nhantien');
+        const board = $('.data-rank');
+        const nhantien = $('.NhanMoney')
+        const imglucky = $('#imglucky')
+        var mang  = [];
+        const game = {
+            stunPlayer:0,
+            audio: function(){
+                var audio = new Audio('./assets/music/CamOn.mp3');
+                audio.play();
+            },
+            loadingPLayer:function(){
+                const getArrayPerson = JSON.parse(localStorage.getItem('personJoin'))
+                if(this.stunPlayer === getArrayPerson.length){
+                    playerName.innerText = 'Đã hết lượt chơi !'
+                    btnPlay.disabled=true;
+                    const OKRANK = JSON.parse(localStorage.getItem('XepHang'));
+                    OKRANK.sort();
+                    localStorage.setItem('XepHang',JSON.stringify(OKRANK))
+                    this.final();
+                }
+                else {
+                    localStorage.setItem('currentPlayer',getArrayPerson[this.stunPlayer])
+                    playerName.innerText = getArrayPerson[this.stunPlayer];
+                }
+            },
+            final: function(){
+                this.audio();
+                setTimeout(()=>{
+                    window.location.assign("Final.html")
+                },8000)
+            },
+            money: [
+                {
+                    name:'1k',
+                    path:'./assets/img/1k.jpg',
+                    
+                    count:localStorage.getItem('1k')
+                },
+                {
+                    name:'2k',
+                    path:'./assets/img/2k.jpg',
+                    count:localStorage.getItem('2k')
+                },
+                {
+                    name:'5k',
+                    path:'./assets/img/5k.jpg',
+                    count:localStorage.getItem('5k')
+                },
+                {
+                    name:'10k',
+                    path:'./assets/img/10k.jpg',
+                    count:localStorage.getItem('10k')
+                },
+                {
+                    name:'20k',
+                    path:'./assets/img/20k.png',
+                    count:localStorage.getItem('20k')
+                },
+                {
+                    name:'50k',
+                    path:'./assets/img/50k.jpg',
+                    count:localStorage.getItem('50k')
+                },
+                {
+                    name:'100k',
+                    path:'./assets/img/100k.jpg',
+                    count:localStorage.getItem('100k')
+                },
+            ],
+            makeArrayRender: function(){
+            const arraySum=[];
+               let count=0;
+                const htmls = this.money.map((item)=>{
+                    for(let i=1;i<=item.count;i++){
+                        arraySum.push(`
+                            <div class="img-cart"  data-user="${item.name}" data-number="${++count}">
+                                <img src="${item.path}" alt="" >
+                            </div>
+                        `)
+                    }
+                   return arraySum;
+                })
+                localStorage.setItem('arrayMoney',JSON.stringify(arraySum))
+                cart.innerHTML = arraySum.join('');
+            },
+            RenderAgain:function(){
+                const getArrary = JSON.parse(localStorage.getItem('arrayMoney'));
+                let count=0;
+                const htmll = getArrary.map((item)=>{
+                    return item;
+                })
+                cart.innerHTML =htmll.join('');
+            },
+            randomMoney: function(){
+                //Xử lí sự kiện tạo khung chọn
+                const getArrary = localStorage.getItem('arrayMoney');
+                const lengthArray = JSON.parse(getArrary).length;
+                
+                //Mảng xoay vòng áp dụng hiệu ứng
+                const money = JSON.parse(getArrary); 
+                const luckynumber=localStorage.getItem('luckyNumber');
+                const newluckynumber=JSON.parse(luckynumber);
+                
+                const newnew = $$('.img-cart')[newluckynumber-1]
+                ;
+            
+                money.splice(newluckynumber-1,1);
+                // console.log(newluckynumber,newnew,money)
+              
+                localStorage.setItem('arrayMoney',JSON.stringify(money))
+                // localStorage.setItem('arrayMoney',getArrary)
+                newnew.classList.add('borderColor')
+            },
+            handleEvent:function(){
+                const _this=this;
+                //Xử lí khi nhấn bắt đầu
+               btnPlay.onclick = ()=>{
+                   anKq.style.display='flex'
+                   overlay.style.display='block';
+                   overlay.style.opacity=0;
+                   btnPlay.style.display='none'
+                    divAnimation.forEach((item,index)=>{
+                        item.classList.add('animation')
+                    })
+                    setTimeout(StopAnimation,4500);
+               }
+
+               //Xử lí thời gian ngẫu nhiên dừng
+               function StopAnimation(){
+                divAnimation.forEach((item,index)=>{
+                        item.classList.remove('animation')
+                    })
+                    overlay.style.display='none'
+               }
+
+
+               //Xử lí âm thanh 
+               function AudioAll(code){
+                    let choose;
+                    switch(code){
+                        case '1k':
+                            choose = './assets/music/1k.mp3';
+                            break;
+                        case '2k':
+                            choose = './assets/music/2k.mp3';
+                            break;
+                        case '5k':
+                            choose = './assets/music/5k.mp3';
+                            break;
+                        case '10k':
+                            choose = './assets/music/10k.mp3';
+                            break;
+                        case '20k':
+                            choose = './assets/music/20k.mp3';
+                            break;
+                        case '50k':
+                            choose = './assets/music/50k.mp3';
+                            break;
+                        case '100k':
+                            choose = './assets/music/100k.mp3';
+                            break;
+                    }
+
+     
+                    const eachMoney = new Audio(choose)
+                    eachMoney.play();
+
+
+                    if(choose==='./assets/music/100k.mp3'){
+                        setTimeout(()=>{
+                        const defaultAudio = new Audio('./assets/music/AnNhanTien.mp3');
+                        defaultAudio.play();
+                    },7500)
+                    }
+                    else {
+                        setTimeout(()=>{
+                        const defaultAudio = new Audio('./assets/music/AnNhanTien.mp3');
+                        defaultAudio.play();
+                    },2400)
+                    }
+                   
+                   
+               }
+
+               //Xử lí khi click vào 1 trong 3 túi lì xì
+              divAnimation.forEach((item,index)=>{
+                  item.onclick = ()=>{
+                      item.classList.add('kichhoatchon')
+                      showNumberLucky.innerText = item.dataset.index; 
+                      localStorage.setItem('luckyNumber',item.dataset.index)
+                      const compareNumber = item.dataset.index;
+                      $$('.img-cart').forEach((i,indeX)=>{
+                           if(i.dataset.number === compareNumber){
+                                localStorage.setItem('currentMoney',i.dataset.user)
+                                AudioAll(i.dataset.user)
+                           }
+                      })
+               
+                    //   localStorage.setItem('currentMoney',);
+                      _this.randomMoney();
+                      anKq.zIndex=-1;
+                      anKq.style.opacity=1;
+                      overlay.style.display='block';
+                      nhantien.disabled=false;
+                    }
+              })
+              
+              //Xử lí khi nhấn nhận tiền
+              getMoney.onclick = ()=>{
+                showNumberLucky.innerText='?'
+                  const getPlayer = localStorage.getItem('currentPlayer');
+                  const getMoney = localStorage.getItem('currentMoney');
+                  const datafromstore = JSON.parse(localStorage.getItem('boardRank'));
+                   let stringnew = datafromstore;
+                   nhantien.disabled=true;
+                
+
+                //Xử lí 1 mảng để xếp hạng tiền người chơi
+
+                const ob = {
+                    name:'',
+                    money:''
+                }
+                ob.name = getPlayer;
+                ob.money=getMoney;
+                mang.push(ob);
+                console.log(mang)
+                localStorage.setItem('XepHang',JSON.stringify(mang))
+
+                // stringnew.push(`
+                //     <tr>
+                //         <td>${getPlayer}</td>
+                //         <td>${getMoney}</td>    
+                //     </tr>
+                // `)
+                 
+                
+
+                // localStorage.setItem('boardRank',JSON.stringify(stringnew));
+
+                // board.innerHTML = stringnew.join('');
+                
+
+                //Xử lí hiển thị ảnh tờ tiền
+             
+                    let link;
+                switch(getMoney){
+                    case '1k':
+                        link=_this.money[0].path;
+                        break;
+                    case '2k':
+                        link=_this.money[1].path;
+                        break;
+                    case '5k':
+                        link=_this.money[2].path;
+                        break;
+                    case '10k':
+                        link=_this.money[3].path;
+                        break;
+                    case '20k':
+                        link=_this.money[4].path;
+                        break;
+                    case '50k':
+                        link=_this.money[5].path;
+                        break;
+                    case '100k':
+                        link=_this.money[6].path;
+                        break;
+                }
+                imglucky.src=link;
+                imglucky.style.display='block'
+
+
+
+                //Xử lí thời gian chuyển người chơi
+                setTimeout(()=>{
+                    $('.item-number.kichhoatchon').classList.remove('kichhoatchon');
+                  
+                    // localStorage.setItem('arrayMoney',JSON.stringify(ArrayYes));
+                    _this.stunPlayer++;
+                    _this.loadingPLayer();
+                    btnPlay.style.display='block'
+                    // _this.randomMoney();
+                    _this.randomNumberCart();
+                    _this.RenderAgain();
+                    const arrayChange = JSON.parse(localStorage.getItem('arrayMoney'));
+                    let c = 0;
+                    const ArrayYes = document.querySelectorAll('.img-cart');
+                    ArrayYes.forEach((item)=>{
+                        item.dataset.number=++c;
+                    })
+                },2000)
+              }
+            
+            }
+            ,
+            randomNumberCart: function(){
+                const getArrary = JSON.parse(localStorage.getItem('arrayMoney'));
+                divAnimation.forEach((item,index)=>{
+                    const randomNumber=Math.floor(Math.random()*getArrary.length) + 1
+                    item.dataset.index = randomNumber;
+                })
+            },
+            start: function(){
+                const arraynew = [];
+                localStorage.setItem('boardRank',JSON.stringify(arraynew));
+                this.loadingPLayer();
+                this.makeArrayRender();
+                this.randomNumberCart();
+                this.handleEvent();
+            }
+        }
+        game.start();
+    </script>
+</body>
+</html>
